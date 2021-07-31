@@ -10,7 +10,8 @@ games = [
      'playingtime','minplaytime','maxplaytime',
      'age',
      'mechanics','categories','families','expansions',
-     'poll_age','poll_numpl'
+     'poll_age','poll_numpl',
+     'numrated','numcomments','bayesaverage','average'
     ]
 ]
 
@@ -57,6 +58,12 @@ for fname in sorted(glob('bgg/*.xml'),key=split_ints):
         ] for x in g.xpath(
             'poll[@name="suggested_numplayers"]/results'
         ) ] )
+
+        rt = g.xpath('statistics/ratings')[0]
+        for v in ['usersrated','numcomments']:
+            game.append( try_convert(rt.xpath(v)[0].text,int) )
+        for v in ['bayesaverage','average']:
+            game.append( try_convert(rt.xpath(v)[0].text,float) )
 
         games.append(game)
 
