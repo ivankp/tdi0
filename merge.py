@@ -15,11 +15,11 @@ games = [
     ]
 ]
 
-def try_convert(x,f,x0=None):
+def try_apply(x,f,v0=None):
     try:
         return f(x)
     except:
-        return x0
+        return v0
 
 def split_ints(s):
     return [ int(x) if i%2 else x for i,x in enumerate(re.split(r'(\d+)',s)) ]
@@ -32,13 +32,13 @@ for fname in sorted(glob('bgg/*.xml'),key=split_ints):
             continue
         game = [ int(x) ]
 
-        game.append( try_convert(g.xpath('yearpublished')[0].text,int) )
-        game.append( try_convert(g.xpath('minplayers')[0].text,int) )
-        game.append( try_convert(g.xpath('maxplayers')[0].text,int) )
-        game.append( try_convert(g.xpath('playingtime')[0].text,float) )
-        game.append( try_convert(g.xpath('minplaytime')[0].text,float) )
-        game.append( try_convert(g.xpath('maxplaytime')[0].text,float) )
-        game.append( try_convert(g.xpath('age')[0].text,float) )
+        game.append( try_apply(g.xpath('yearpublished')[0].text,int) )
+        game.append( try_apply(g.xpath('minplayers')[0].text,int) )
+        game.append( try_apply(g.xpath('maxplayers')[0].text,int) )
+        game.append( try_apply(g.xpath('playingtime')[0].text,float) )
+        game.append( try_apply(g.xpath('minplaytime')[0].text,float) )
+        game.append( try_apply(g.xpath('maxplaytime')[0].text,float) )
+        game.append( try_apply(g.xpath('age')[0].text,float) )
 
         game.append( [ x.text for x in g.xpath('boardgamemechanic') ] )
         game.append( [ x.text for x in g.xpath('boardgamecategory') ] )
@@ -53,17 +53,19 @@ for fname in sorted(glob('bgg/*.xml'),key=split_ints):
         ) ] )
 
         game.append( [ [
-            int(x.xpath(f'result[@value="{v}"]')[0].get('numvotes'))
-            for v in ['Best','Recommended','Not Recommended']
+            try_apply(
+                x.xpath(f'result[@value="{v}"]'),
+                lambda x: int(x[0].get('numvotes'))
+            ) for v in ['Best','Recommended','Not Recommended']
         ] for x in g.xpath(
             'poll[@name="suggested_numplayers"]/results'
         ) ] )
 
         rt = g.xpath('statistics/ratings')[0]
         for v in ['usersrated','numcomments']:
-            game.append( try_convert(rt.xpath(v)[0].text,int) )
+            game.append( try_apply(rt.xpath(v)[0].text,int) )
         for v in ['bayesaverage','average']:
-            game.append( try_convert(rt.xpath(v)[0].text,float) )
+            game.append( try_apply(rt.xpath(v)[0].text,float) )
 
         games.append(game)
 
